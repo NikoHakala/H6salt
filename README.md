@@ -1,0 +1,256 @@
+# H6 Palvelinten Hallinta
+
+Tehtävä tehty Xubuntu 18.04 käyttöjärjestelmällä
+
+Jos kopioit tämän salt lamp setin niin muista vaihtaa salasanoja mariadb init.sls ja default.my.cnf tiedostoissa.
+
+Alkutoimet
+
+	setxkbmap fi && sudo apt-get update && sudo apt-get install -y gedit curl chromium-browser
+
+# Asenna LAMP saltilla
+
+## Apache Manuaaliasennus
+
+Aloitin asentamalla apachen ja poistamalla default sivun.
+
+	sudo apt-get install apache2
+	
+apakkelocalhost kuva
+
+	echo DefaultPage | sudo tee /var/www/html/index.html
+
+apakkelocalhostDefaultrm kuva
+
+Sitten laitoin käyttäjien kotisivut toimimaan.
+
+	sudo a2enmod userdir
+	sudo systemctl restart apache2
+	mkdir public_html && cd public_html
+	nano index.html
+	
+xubuntukotisivu kuva
+
+## Apache Automatisointi Saltilla
+
+Sitten kun apache toimi aloitin automatisoinnin saltilla
+
+Ensin tietenkin asensin salt masterin ja orjan ja hyväksyin masterkoneen orjaksi.
+
+	sudo apt-get install salt-master salt-minion -y
+	echo -e "master: 192.168.10.47\nid: MasterMinion"|sudo tee /etc/salt/minion
+	sudo systemctl restart salt-minion
+	sudo salt-key -A
+
+Sitten aloin tekemään apache init.sls tiedostoa
+
+	sudo mkdir -p /srv/salt/apache && cd /srv/salt/apache
+
+Tein viellä top.sls tiedoston.
+
+	sudoedit /srv/salt/top.sls
+	cat /srv/salt/top.sls
+	base:
+	  '*':
+	    - apache
+
+	sudoedit init.sls
+
+Apache init sisältö
+
+	cat init.sls
+	apache2:
+	  pkg.installed
+
+	/var/www/html/index.html:
+	  file.managed:
+	    - source: salt://apache/default-index.html
+
+	/etc/apache2/mods-enabled/userdir.conf:
+	  file.symlink:
+	    - target: ../mods-available/userdir.conf
+	    - watch_in:
+	      - service: apache2service
+
+	/etc/apache2/mods-enabled/userdir.load:
+	  file.symlink:
+	    - target: ../mods-available/userdir.load
+	    - watch_in:
+	      - service: apache2service
+
+	apache2service:
+	  service.running:
+	    - name: apache2
+
+Kun apachen init oli valmis ajoin sen muutaman kerran 
+ensin apache asennettuna sitten poistin apachen ja kokeilin uudelleen.
+
+Se toimi tarpeeksi hyvin.
+
+Sitten tein /srv/salt/skel kansion johon tein public_html automatisoinnin.
+
+	sudo mkdir /srv/salt/skel
+	sudoedit init.sls
+
+Skel init sisältö
+
+	cat init.sls
+	/etc/skel/public_html/index.html:
+	  file.managed:
+	    - source: salt://skel/default-index.html
+	    - makedirs: True
+
+Lisäsin skelin top.slsään
+
+	sudo salt '*' state.apply
+
+Tein käyttäjän nimeltä pekka testatakseni skellin toimintaa.
+
+	curl localhost/~pekka/
+	default
+
+Se näytti toimivan.
+
+## MariaDB + ufw portit Manuaaliasennus
+
+Aloitin mariadb asennuksen ensin muuttamalla palomuurin asetuksia.
+
+	sudo ufw allow 22/tcp
+	sudo ufw enable
+	sudo ufw allow 4505/tcp
+	sudo ufw allow 4506
+	sudo ufw allow 80/tcp
+
+Sitten asensin mariadbn ja tein sinne testi databasen ja sille käyttäjän.
+
+	sudo apt-get -y install mariadb-client mariadb-server
+	sudo mariadb -u root
+	CREATE DATABASE ninjamakkara CHARACTER SET utf8;
+	GRANT ALL ON ninjamakkara.* TO ninjamakkara@localhost IDENTIFIED BY 'Lisää tähän oma vaikea salasana';
+	exit
+	
+Sitten tein käyttäjälle .my.cnf tiedoston kirjautumisen helpottamista varten.
+
+	touch .my.cnf
+	chmod og-rwx .my.cnf
+	nano .my.cnf
+
+Tältä näyttää .my.cnf tiedoston pohja
+
+	cat .my.cnf
+	[client]
+	user=ninjamakkara
+	password='Tähän oma vaikea salasana'
+	database=ninjamakkara
+
+	Sudo salt '*' state.apply
+
+Kun se on tehty oikein niin mariadb komennolla pääsee kirjautumaan sisään ilman salasanaa ym.
+
+
+## MariaDB + ufw portit Automatisointi Saltilla
+
+Kun mariadb toimi manuaalisesti asennettuna aloitin automatisoinnin.
+
+	sudo mkdir /srv/salt/mariadb && cd /srv/salt/mariadb
+	sudoedit init.sls
+
+Mariadb init sisältö
+	cat init.sls
+	mariadb-client:
+	  pkg.installed
+
+	mariadb-server:
+	  pkg.installed
+
+	create_testdb:
+	  cmd.run:
+	    - name: 'echo create database makkaraninjat|sudo mariadb -u root'
+	    - require:
+	      - mariadb-client
+	    - unless: 'echo show databases|sudo mariadb -u root|grep makkaraninjat'
+
+	create_testdbuser:
+	  cmd.run:
+	    - name: echo "grant all on makkaraninjat.* to makkaraninjat@localhost identified by 'salasana'"|sudo mariadb -u root
+	    - require:
+	      - mariadb-client
+	    - unless: 'echo select user from mysql.user|sudo mariadb -u root|grep makkaraninjat'
+
+Sitten tein .my.cnf tiedostolle automatisoinnin mutta vain xubuntu käyttäjälle.
+Tämä ei tunnu mielestäni tarpeelliselta mutta kai tämä on hyvää harjoitusta.
+
+	sudo mkdir /srv/salt/mycnf && cd /srv/salt/mycnf
+	sudo edit init.sls
+
+	cat init.sls
+	/home/xubuntu/.my.cnf:
+	  file.managed:
+	    - source: salt://mycnf/default.my.cnf
+	    - user: xubuntu
+	    - group: xubuntu
+
+Lisäsin mycnffän top.slsään ja kokelin toimiiko se.
+
+Nyt mariadb komentoa käyttäen xubuntu käyttäjällä voidaan kirjautua makkaraninjat tietokantaan käyttäjällä makkaraninjat.
+
+Kun mycnf toimi oikein automatisoin ufw porttien configuroinnin.
+
+	sudo mkdir /srv/salt/ufw && cd /srv/salt/ufw
+
+Kopioin manuaalisesti vaihtamani säännöt eli portit 22, 80, 4505 ja 4506 auki.
+
+	sudo cp /etc/ufw/user.rules /srv/salt/default-user.rules
+	sudo cp /etc/ufw/user6.rules /srv/salt/default-user.rules
+	
+Sitten tein init.sls tiedoston.
+	
+	sudoedit init.sls
+
+ufw init sisältö.
+	cat init.sls
+	ufw:
+	  pkg.installed
+
+	/etc/ufw/user.rules:
+	  file.managed:
+	    - source: salt://ufw/default-user.rules
+	    - watch_in:
+	      - service: ufw.service
+
+	/etc/ufw/user6.rules:
+	  file.managed:
+	    - source: salt://ufw/default-user6.rules
+	    - watch_in:
+	      - service: ufw.service
+
+
+	ufw-enable:
+	  cmd.run:
+	    - name: 'ufw --force enable'
+	    - require:
+	      - ufw
+
+	ufw.service:
+	  service.running
+
+Sitten vielä muutin porttien asetuksia manuaalisesti jonka jälkeen lisäsin ufwn top.slsään ja ajoin highstaten.
+
+	sudo ufw deny 80/tcp
+	sudo salt '*' state.apply
+
+Asiat eivät menneet kuten oletin koska en muuttanut user.rules tiedostojen oikeuksia.
+
+	sudo chmod o+r default-user.rules
+	sudo chmod o+r default-user6.rules
+
+Sitten kokeilin uudelleen highstatea.
+
+Uudet säännöt menivät läpi mutta ufw enable komento ajetaan joka kerta vaikka ufw on päällä joten korjasin sen.
+
+	
+	
+
+## PHP manuaaliasennus
+
+## PHP Automatisointi Saltilla
