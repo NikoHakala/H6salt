@@ -19,7 +19,7 @@ ufw-enable:
     - name: 'ufw --force enable'
     - require:
       - ufw
-    - unless: 'sudo ufw status|grep active'
+    - unless: "sudo ufw status|grep 'Status: active'"
 
 ufw.service:
   service.running

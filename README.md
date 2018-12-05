@@ -342,8 +342,41 @@ Nyt uusille käyttäjille tulee valmiiksi toimiva index.php joka laskee laskun 2
 Gittasin kaiken githubiin ja käynnistin koneen uudelleen.
 
 
+Kaikki meni läpi heittämällä mutta Summaryssä luki Succeeded: 19 (changed=17)
+Joten tutkin mitä ei muutettu.
 
+Ilmeisesti ufw ei mennyt päälle ja se oli asennettuna joten kaikki ei toimi kuten pitää.
 
+Löysin mistä se johtui.
 
+En tullut ajatelleeksi että inactiven sisällä on sana active joten muutin unless kohtaa ufw initissä
 
+Ufw initin lopullinen sisältö
+
+	cat init.sls
+	ufw:
+	  pkg.installed
+	
+	/etc/ufw/user.rules:
+	  file.managed:
+	    - source: salt://ufw/default-user.rules
+	    - watch_in:
+	      - service: ufw.service
+	
+	/etc/ufw/user6.rules:
+	  file.managed:
+	    - source: salt://ufw/default-user6.rules
+	    - watch_in:
+	      - service: ufw.service
+	
+	
+	ufw-enable:
+	  cmd.run:
+	    - name: 'ufw --force enable'
+	    - require:
+	      - ufw
+	    - unless: "sudo ufw status|grep 'Status: active'"
+	
+	ufw.service:
+	  service.running
 
