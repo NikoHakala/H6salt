@@ -22,7 +22,7 @@ Aloitin asentamalla apachen ja poistamalla default sivun.
 
 	echo DefaultPage | sudo tee /var/www/html/index.html
 
-apakkelocalhostDefaultrm kuva
+![Apache etusivu tyhjennettynä](https://github.com/NikoHakala/salt/blob/master/apakkelocalhostdefaultrm.png)
 
 Sitten laitoin käyttäjien kotisivut toimimaan.
 
@@ -30,8 +30,8 @@ Sitten laitoin käyttäjien kotisivut toimimaan.
 	sudo systemctl restart apache2
 	mkdir public_html && cd public_html
 	nano index.html
-	
-xubuntukotisivu kuva
+
+![Xubuntun kotisivu](https://github.com/NikoHakala/salt/blob/master/xubuntukotisivu.png)
 
 ## Apache Automatisointi Saltilla
 
@@ -273,7 +273,7 @@ Jotta php toimisi normaali käyttäjillä pitää muokata phpn conf tiedostoa.
 
 	sudoedit /etc/apache2/mods-available/php7.2.conf
 
-phpifmodule kuva
+![Php if module](https://github.com/NikoHakala/salt/blob/master/phpifmodule.png)
 
 Sitten apache pitää käynnistää uudelleen.
 
@@ -335,7 +335,7 @@ Ja muutin vielä init.sls tiedoston oikeaan muotoon
 
 Nyt uusille käyttäjille tulee valmiiksi toimiva index.php joka laskee laskun 2+2.
 
-phpsalttestaus Kuva
+![Php salt testaus](https://github.com/NikoHakala/salt/blob/master/phpsalttestaus.png)
 
 ## Modulin testaus puhtaalta xubuntu 18.04 live koneelta
 
