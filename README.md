@@ -380,3 +380,11 @@ Ufw initin lopullinen sisältö
 	ufw.service:
 	  service.running
 
+
+Kokeilin viellä kerran tyhjällä Xubuntu 18.04 livellä ja kaikki toimi kuten oletin.
+
+# Lähteet
+
+http://terokarvinen.com/2018/aikataulu--palvelinten-hallinta-ict4tn022-3004-ti-ja-3002-to--loppukevat-2018-5p Linkki kurssiin
+
+https://nikohakala646432229.wordpress.com/ Wordpress sivuni
