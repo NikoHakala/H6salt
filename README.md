@@ -315,7 +315,7 @@ Sitten vielä tarvitsee kopioida php conf tiedosto jota muokattiin aikaisemmin.
 
 	sudo cp /etc/apache2/mods-available/php7.2.conf /srv/salt/php/default-php7.2.conf
 
-Kokeilin highstatea ja kaikki meni läpi. Joten en tee asialle vilä mitään.
+Kokeilin highstatea ja kaikki meni läpi. Joten en tee asialle viellä mitään.
 
 Sitten muutin vielä skellin default sivun php loppuiseksi.
 
@@ -331,9 +331,13 @@ Ja muutin vielä init.sls tiedoston oikeaan muotoon
 	    - source: salt://skel/default-index.php
 	    - makedirs: True
 
-Nyt uusille käyttäjille tulee valmiiksi toimiva index.php
+Nyt uusille käyttäjille tulee valmiiksi toimiva index.php joka laskee laskun 2+2.
 
+phpsalttestaus Kuva
 
+## Modulin testaus puhtaalta xubuntu 18.04 live koneelta
+
+Gittasin kaiken githubiin ja käynnistin koneen uudelleen.
 
 
 
