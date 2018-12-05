@@ -248,7 +248,17 @@ Sitten kokeilin uudelleen highstatea.
 
 Uudet säännöt menivät läpi mutta ufw enable komento ajetaan joka kerta vaikka ufw on päällä joten korjasin sen.
 
-	
+
+ufw init korjattu ufw-enable idempotenttiseksi
+
+	ufw-enable:
+	  cmd.run:
+	    - name: 'ufw --force enable'
+	    - require:
+	      - ufw
+	    - unless: 'sudo ufw status|grep active'
+
+Sitten kaikki toimi oikein mukavasti.
 	
 
 ## PHP manuaaliasennus
