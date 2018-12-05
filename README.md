@@ -15,8 +15,9 @@ Alkutoimet
 Aloitin asentamalla apachen ja poistamalla default sivun.
 
 	sudo apt-get install apache2
-	
-apakkelocalhost kuva
+
+salt/apakkelocalhost.png
+      
 
 	echo DefaultPage | sudo tee /var/www/html/index.html
 
