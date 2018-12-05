@@ -1,4 +1,4 @@
-/etc/skel/public_html/index.html:
+/etc/skel/public_html/index.php:
   file.managed:
-    - source: salt://skel/default-index.html
+    - source: salt://skel/default-index.php
     - makedirs: True

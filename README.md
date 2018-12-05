@@ -263,4 +263,81 @@ Sitten kaikki toimi oikein mukavasti.
 
 ## PHP manuaaliasennus
 
+Sitten aloitin phpn manuaali asennuksen
+
+	sudo apt-get install -y libapache2-mod-php
+
+Jotta php toimisi normaali käyttäjillä pitää muokata phpn conf tiedostoa.
+
+	sudoedit /etc/apache2/mods-available/php7.2.conf
+
+phpifmodule kuva
+
+Sitten apache pitää käynnistää uudelleen.
+
+	sudo systemctl restart apache2
+
+Kun apache käynnistyi uudelleen kokeilin toimiko php.
+
+	cd && cd public_html && mv index.html index.php
+	echo -e "<?php\nprint 2+2;\n?>"|sudo tee index.php
+
+Xubuntun kotisivu
+
+	curl localhost/~xubuntu/
+	4
+
+
 ## PHP Automatisointi Saltilla
+
+Kun php todistettavasti toimi manuaali asennuksen jälkeen aloitin automatisoinnin
+
+	sudo mkdir /srv/salt/php
+	sudoedit init.sls
+
+php init sisältö
+
+	cat init.sls
+	libapache2-mod-php:
+	  pkg.installed
+
+	/etc/apache2/mods-available/php7.2.conf:
+	  file.managed:
+	    - source: salt://php/default-php7.2.conf
+	    - watch_in:
+	      - service: apache2restart
+
+	apache2restart:
+	  service.running:
+	    - name: apache2
+
+Sitten vielä tarvitsee kopioida php conf tiedosto jota muokattiin aikaisemmin.
+
+	sudo cp /etc/apache2/mods-available/php7.2.conf /srv/salt/php/default-php7.2.conf
+
+Kokeilin highstatea ja kaikki meni läpi. Joten en tee asialle vilä mitään.
+
+Sitten muutin vielä skellin default sivun php loppuiseksi.
+
+	cd /srv/salt/skel
+	sudo mv default-index.html default-index.php
+
+Ja muutin vielä init.sls tiedoston oikeaan muotoon 
+
+	cat init.sls
+
+	/etc/skel/public_html/index.php:
+	  file.managed:
+	    - source: salt://skel/default-index.php
+	    - makedirs: True
+
+Nyt uusille käyttäjille tulee valmiiksi toimiva index.php
+
+
+
+
+
+
+
+
+

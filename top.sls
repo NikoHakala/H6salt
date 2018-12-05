@@ -5,3 +5,4 @@ base:
     - skel
     - mariadb
     - mycnf
+    - php
