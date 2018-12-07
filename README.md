@@ -17,12 +17,12 @@ Aloitin asentamalla apachen ja poistamalla default sivun.
 	sudo apt-get install apache2
 
 
-![Apachen etusivu](https://github.com/NikoHakala/salt/blob/master/apakkelocalhost.png)
+![Apachen etusivu](https://github.com/NikoHakala/H6salt/apakkelocalhost.png)
       
 
 	echo DefaultPage | sudo tee /var/www/html/index.html
 
-![Apache etusivu tyhjennettynä](https://github.com/NikoHakala/salt/blob/master/apakkelocalhostdefaultrm.png)
+![Apache etusivu tyhjennettynä](https://github.com/NikoHakala/H6salt/apakkelocalhostdefaultrm.png)
 
 Sitten laitoin käyttäjien kotisivut toimimaan.
 
@@ -31,7 +31,7 @@ Sitten laitoin käyttäjien kotisivut toimimaan.
 	mkdir public_html && cd public_html
 	nano index.html
 
-![Xubuntun kotisivu](https://github.com/NikoHakala/salt/blob/master/xubuntukotisivu.png)
+![Xubuntun kotisivu](https://github.com/NikoHakala/H6salt/xubuntukotisivu.png)
 
 ## Apache Automatisointi Saltilla
 
@@ -273,7 +273,7 @@ Jotta php toimisi normaali käyttäjillä pitää muokata phpn conf tiedostoa.
 
 	sudoedit /etc/apache2/mods-available/php7.2.conf
 
-![Php if module](https://github.com/NikoHakala/salt/blob/master/phpifmodule.png)
+![Php if module](https://github.com/NikoHakala/H6salt/phpifmodule.png)
 
 Sitten apache pitää käynnistää uudelleen.
 
@@ -335,7 +335,7 @@ Ja muutin vielä init.sls tiedoston oikeaan muotoon
 
 Nyt uusille käyttäjille tulee valmiiksi toimiva index.php joka laskee laskun 2+2.
 
-![Php salt testaus](https://github.com/NikoHakala/salt/blob/master/phpsalttestaus.png)
+![Php salt testaus](https://github.com/NikoHakala/H6salt/phpsalttestaus.png)
 
 ## Modulin testaus puhtaalta xubuntu 18.04 live koneelta
 
